@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeQuest — Ta Vie en RPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cinzel:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep:#05050f;--bg-dark:#0d0d1f;--bg-card:#111128;--bg-card2:#15152e;
+    --border:#2a2a5a;--border-glow:#4a3f8f;
+    --gold:#d4a843;--gold-light:#f0c96a;--gold-dim:#8a6b1e;
+    --purple:#7c5cbf;--purple-light:#a07de0;--purple-dim:#3d2d6e;
+    --red:#c0392b;--red-light:#e74c3c;
+    --green:#27ae60;--green-light:#2ecc71;
+    --blue:#2980b9;--blue-light:#3498db;
+    --text:#e8e0ff;--text-dim:#9090b8;--text-muted:#5a5a8a;
+    --xp-color:#5cb8ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg-deep);color:var(--text);
+    font-family:'Crimson Pro',serif;font-size:17px;line-height:1.6;
+    min-height:100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 10%,rgba(60,30,120,.15) 0%,transparent 50%),
+      radial-gradient(ellipse at 80% 90%,rgba(30,20,80,.2) 0%,transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%232a2a5a' fill-opacity='0.12'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* ── HEADER ── */
+  header{text-align:center;padding:1.8rem 1rem 1.4rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(80,50,160,.1) 0%,transparent 100%);position:relative;}
+  header::before{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:200px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+  .game-title{font-family:'Cinzel',serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:700;color:var(--gold-light);text-shadow:0 0 30px rgba(212,168,67,.4);letter-spacing:4px;}
+  .game-subtitle{font-family:'Crimson Pro',serif;font-style:italic;color:var(--text-dim);font-size:1rem;margin-top:.3rem;}
+
+  /* ── LAYOUT ── */
+  .app{max-width:1300px;margin:0 auto;padding:1.5rem;display:grid;grid-template-columns:300px 1fr;gap:1.5rem;}
+
+  /* ── CARD ── */
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:1.2rem;position:relative;overflow:hidden;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--border-glow),transparent);opacity:.6;}
+  .card-title{font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;justify-content:space-between;}
+  .card-title-left{display:flex;align-items:center;gap:8px;}
+
+  /* ── CHARACTER ── */
+  .character-panel{grid-column:1;grid-row:1/3;}
+  .avatar-zone{text-align:center;margin-bottom:1rem;}
+  .avatar-frame{width:90px;height:90px;margin:0 auto .6rem;border:2px solid var(--gold-dim);border-radius:8px;background:var(--bg-dark);display:flex;align-items:center;justify-content:center;font-size:2.6rem;position:relative;cursor:pointer;transition:border-color .3s;}
+  .avatar-frame:hover{border-color:var(--gold);}
+  .avatar-frame .hint{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--text-muted);white-space:nowrap;font-family:'Crimson Pro',serif;}
+  .char-name{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold-light);background:none;border:none;text-align:center;width:100%;outline:none;cursor:pointer;padding:2px 6px;border-radius:4px;transition:background .2s;}
+  .char-name:hover,.char-name:focus{background:rgba(255,255,255,.05);}
+  .class-selector{margin:.5rem 0;display:flex;gap:5px;flex-wrap:wrap;justify-content:center;}
+  .class-btn{font-family:'Crimson Pro',serif;font-size:.78rem;padding:2px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .2s;}
+  .class-btn:hover{border-color:var(--purple-light);color:var(--purple-light);}
+  .class-btn.active{background:var(--purple-dim);border-color:var(--purple-light);color:var(--purple-light);}
+
+  /* ── LEVEL ── */
+  .level-display{background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;padding:.8rem;margin:.8rem 0;text-align:center;}
+  .level-num{font-family:'Press Start 2P',monospace;font-size:1.5rem;color:var(--gold-light);}
+  .level-label{font-size:.68rem;color:var(--text-muted);letter-spacing:2px;margin-bottom:.7rem;font-family:'Cinzel',serif;}
+  .xp-bar-wrap{position:relative;height:13px;background:var(--bg-deep);border-radius:7px;border:1px solid var(--border);overflow:hidden;}
+  .xp-bar{height:100%;background:linear-gradient(90deg,#2980b9,#5cb8ff);border-radius:7px;transition:width .6s cubic-bezier(.34,1.56,.64,1);}
+  .xp-bar::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,.25) 0%,transparent 100%);}
+  .xp-text{font-size:.7rem;color:var(--text-dim);margin-top:3px;text-align:right;}
+
+  /* ── STATS ── */
+  .stat-row{margin-bottom:.65rem;position:relative;}
+  .stat-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+  .stat-name{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:1px;}
+  .stat-val{font-family:'Press Start 2P',monospace;font-size:.55rem;padding:1px 5px;border-radius:3px;background:rgba(0,0,0,.3);}
+  .stat-bar-wrap{height:8px;background:var(--bg-deep);border-radius:4px;border:1px solid var(--border);overflow:hidden;cursor:pointer;position:relative;}
+  .stat-bar{height:100%;border-radius:4px;transition:width .5s ease;}
+  .stat-del-btn{position:absolute;right:0;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.7rem;padding:0 4px;opacity:0;transition:opacity .2s;}
+  .stat-row:hover .stat-del-btn{opacity:1;}
+  .stat-del-btn:hover{color:var(--red-light);}
+  .points-notice{background:rgba(212,168,67,.1);border:1px solid var(--gold-dim);border-radius:5px;padding:5px 10px;font-size:.75rem;color:var(--gold);text-align:center;margin-top:.5rem;display:none;animation:pulseBorder 1.5s ease infinite;}
+  @keyframes pulseBorder{0%,100%{border-color:var(--gold-dim);}50%{border-color:var(--gold);}}
+
+  /* ── RIGHT ── */
+  .right-col{grid-column:2;display:flex;flex-direction:column;gap:1.5rem;}
+  .bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+
+  /* ── QUESTS ── */
+  .quest-add{display:flex;gap:6px;margin-bottom:.8rem;flex-wrap:wrap;}
+  .quest-input{flex:1;min-width:120px;background:var(--bg-dark);border:1px solid var(--border);border-radius:5px;padding:5px 10px;color:var(--text);font-family:'Crimson Pro',serif;font-size:.95rem;outline:none;transition:border-color .2s;}
+  .quest-input:focus{border-color:var(--purple-light);}
+  select.quest-select{background:var(--bg-dark);border:1px solid var(--border);border-radius:5px;padding:5px 7px;color:var(--text-dim);font-family:'Crimson Pro',serif;font-size:.82rem;outline:none;cursor:pointer;}
+  .btn-add{background:var(--purple-dim);border:1px solid var(--purple);border-radius:5px;padding:5px 14px;color:var(--purple-light);font-family:'Cinzel',serif;font-size:.72rem;cursor:pointer;letter-spacing:1px;transition:all .2s;white-space:nowrap;}
+  .btn-add:hover{background:var(--purple);color:#fff;}
+  .quest-list{display:flex;flex-direction:column;gap:5px;max-height:260px;overflow-y:auto;}
+  .quest-list::-webkit-scrollbar{width:4px;}
+  .quest-list::-webkit-scrollbar-thumb{background:var(--border-glow);border-radius:2px;}
+  .quest-item{display:flex;align-items:center;gap:7px;background:var(--bg-dark);border:1px solid var(--border);border-radius:5px;padding:6px 9px;cursor:pointer;transition:all .2s;overflow:hidden;}
+  .quest-item:hover{border-color:var(--green);}
+  .quest-item.done{opacity:.4;text-decoration:line-through;}
+  .quest-checkbox{width:13px;height:13px;border:1px solid var(--border-glow);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:var(--green-light);}
+  .quest-item.done .quest-checkbox{background:var(--green);border-color:var(--green);}
+  .quest-text{flex:1;font-size:.88rem;}
+  .quest-xp{font-family:'Press Start 2P',monospace;font-size:.48rem;color:var(--xp-color);white-space:nowrap;}
+  .quest-cat{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .quest-del{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.75rem;padding:0 2px;opacity:0;transition:opacity .2s;}
+  .quest-item:hover .quest-del{opacity:1;}
+  .quest-del:hover{color:var(--red-light);}
+
+  /* ── ACHIEVEMENTS ── */
+  .ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:7px;}
+  .ach-item{background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;padding:9px 7px;text-align:center;transition:all .3s;position:relative;}
+  .ach-item.locked{opacity:.3;filter:grayscale(1);}
+  .ach-item.unlocked{border-color:var(--gold-dim);}
+  .ach-item.unlocked:hover{border-color:var(--gold);transform:translateY(-2px);}
+  .ach-item.manual-locked{opacity:.55;cursor:pointer;}
+  .ach-item.manual-locked:hover{opacity:.8;border-color:var(--purple);}
+  .ach-icon{font-size:1.4rem;display:block;margin-bottom:3px;}
+  .ach-name{font-family:'Cinzel',serif;font-size:.58rem;color:var(--text-dim);line-height:1.3;}
+  .ach-item.unlocked .ach-name{color:var(--gold);}
+  .ach-del{position:absolute;top:3px;right:3px;background:none;border:none;color:transparent;cursor:pointer;font-size:.6rem;transition:color .2s;}
+  .ach-item:hover .ach-del{color:var(--text-muted);}
+  .ach-del:hover{color:var(--red-light) !important;}
+
+  /* ── JOURNAL ── */
+  .journal-list{max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;}
+  .journal-list::-webkit-scrollbar{width:4px;}
+  .journal-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+  .journal-entry{display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--text-dim);padding:3px 6px;border-left:2px solid var(--border);}
+  .journal-entry.new{border-left-color:var(--gold);color:var(--text);animation:fadeInSlide .4s ease;}
+  @keyframes fadeInSlide{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+  .journal-time{color:var(--text-muted);font-size:.68rem;white-space:nowrap;margin-top:2px;}
+
+  /* ── MODAL ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:1000;animation:overlayIn .25s ease;}
+  @keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
+  .modal{background:var(--bg-card);border:1px solid var(--border-glow);border-radius:10px;padding:1.8rem;width:90%;max-width:420px;animation:modalIn .3s cubic-bezier(.34,1.56,.64,1);position:relative;}
+  @keyframes modalIn{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .modal-title{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);letter-spacing:2px;margin-bottom:1.2rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);}
+  .modal label{display:block;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:1px;color:var(--text-dim);margin-bottom:.25rem;margin-top:.8rem;}
+  .modal input[type=text],.modal select,.modal textarea{width:100%;background:var(--bg-dark);border:1px solid var(--border);border-radius:5px;padding:7px 10px;color:var(--text);font-family:'Crimson Pro',serif;font-size:1rem;outline:none;transition:border-color .2s;}
+  .modal input[type=text]:focus,.modal select:focus,.modal textarea:focus{border-color:var(--purple-light);}
+  .modal-actions{display:flex;gap:8px;margin-top:1.2rem;justify-content:flex-end;}
+  .btn-cancel{background:transparent;border:1px solid var(--border);border-radius:5px;padding:6px 16px;color:var(--text-dim);font-family:'Cinzel',serif;font-size:.72rem;cursor:pointer;transition:all .2s;}
+  .btn-cancel:hover{border-color:var(--red-light);color:var(--red-light);}
+  .btn-confirm{background:var(--purple-dim);border:1px solid var(--purple);border-radius:5px;padding:6px 18px;color:var(--purple-light);font-family:'Cinzel',serif;font-size:.72rem;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+  .btn-confirm:hover{background:var(--purple);color:#fff;}
+  .emoji-picker-row{display:flex;flex-wrap:wrap;gap:4px;background:var(--bg-dark);border:1px solid var(--border);border-radius:5px;padding:6px;max-height:90px;overflow-y:auto;}
+  .ep-opt{font-size:1.3rem;cursor:pointer;padding:2px;border-radius:3px;transition:background .15s;line-height:1;}
+  .ep-opt:hover{background:rgba(255,255,255,.1);}
+  .ep-opt.selected{background:var(--purple-dim);outline:1px solid var(--purple);}
+  .color-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+  .color-swatch{width:24px;height:24px;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:border-color .15s;}
+  .color-swatch.selected{border-color:#fff;}
+  /* Condition type */
+  .cond-fields{margin-top:.5rem;display:none;}
+  .cond-fields.visible{display:block;}
+
+  /* ── ADD BUTTONS ── */
+  .add-custom-btn{background:none;border:1px dashed var(--border);border-radius:5px;padding:4px 10px;color:var(--text-muted);font-family:'Cinzel',serif;font-size:.65rem;cursor:pointer;transition:all .2s;letter-spacing:1px;white-space:nowrap;}
+  .add-custom-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+
+  /* ── TOASTS ── */
+  .toast-container{position:fixed;top:16px;right:16px;display:flex;flex-direction:column;gap:7px;z-index:9999;pointer-events:none;}
+  .toast{background:var(--bg-card2);border:1px solid var(--gold-dim);border-radius:7px;padding:9px 14px;font-family:'Cinzel',serif;font-size:.72rem;color:var(--gold);animation:toastIn .35s ease forwards;letter-spacing:1px;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+  @keyframes toastIn{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
+  @keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateX(24px);}}
+
+  /* ── LEVEL UP ── */
+  .levelup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:10000;animation:overlayIn .3s ease;}
+  .levelup-box{background:var(--bg-card);border:2px solid var(--gold);border-radius:12px;padding:2.5rem 3rem;text-align:center;animation:levelUpBox .5s cubic-bezier(.34,1.56,.64,1);max-width:360px;}
+  @keyframes levelUpBox{from{transform:scale(.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .levelup-title{font-family:'Press Start 2P',monospace;font-size:1.1rem;color:var(--gold-light);margin-bottom:.4rem;}
+  .levelup-num{font-family:'Press Start 2P',monospace;font-size:3rem;color:var(--gold);text-shadow:0 0 30px rgba(212,168,67,.6);display:block;margin:.4rem 0;}
+  .levelup-sub{font-style:italic;color:var(--text-dim);margin-bottom:1.2rem;}
+  .btn-close{background:var(--gold-dim);border:1px solid var(--gold);border-radius:5px;padding:8px 24px;color:#000;font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:2px;cursor:pointer;font-weight:700;}
+  .btn-close:hover{background:var(--gold);}
+
+  /* ── XP POPUP ── */
+  .xp-popup{position:fixed;font-family:'Press Start 2P',monospace;font-size:.72rem;color:var(--xp-color);pointer-events:none;z-index:9998;animation:floatUp 1.2s ease forwards;text-shadow:0 0 10px var(--xp-color);}
+  @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1);}50%{opacity:1;transform:translateY(-40px) scale(1.15);}100%{opacity:0;transform:translateY(-80px) scale(.8);}}
+
+  /* ── EMOJI PANEL (avatar) ── */
+  .emoji-panel{display:none;flex-wrap:wrap;gap:4px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;padding:7px;margin-top:5px;justify-content:center;}
+  .emoji-panel.open{display:flex;}
+  .emoji-opt{font-size:1.4rem;cursor:pointer;padding:3px;border-radius:4px;transition:background .15s;line-height:1;}
+  .emoji-opt:hover{background:rgba(255,255,255,.1);}
+
+  .empty-state{text-align:center;padding:1.2rem;color:var(--text-muted);font-style:italic;font-size:.88rem;}
+
+  @media(max-width:900px){
+    .app{grid-template-columns:1fr;}
+    .character-panel,.right-col{grid-column:1;}
+    .bottom-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="game-title">⚔ LifeQuest ⚔</div>
+  <div class="game-subtitle">Ta vie, transformée en aventure épique</div>
+</header>
+
+<div class="app">
+
+  <!-- ══ CHARACTER PANEL ══ -->
+  <div class="card character-panel">
+    <div class="card-title"><span class="card-title-left"><span>🧙</span> Fiche de Personnage</span></div>
+
+    <div class="avatar-zone">
+      <div class="avatar-frame" onclick="toggleEmoji()">
+        <span id="avatarEmoji">⚔️</span>
+        <span class="hint">Cliquer pour changer</span>
+      </div>
+      <div class="emoji-panel" id="emojiPanel">
+        <span class="emoji-opt" onclick="setEmoji('⚔️')">⚔️</span><span class="emoji-opt" onclick="setEmoji('🧙')">🧙</span>
+        <span class="emoji-opt" onclick="setEmoji('🏹')">🏹</span><span class="emoji-opt" onclick="setEmoji('🛡️')">🛡️</span>
+        <span class="emoji-opt" onclick="setEmoji('🔮')">🔮</span><span class="emoji-opt" onclick="setEmoji('🐉')">🐉</span>
+        <span class="emoji-opt" onclick="setEmoji('⚡')">⚡</span><span class="emoji-opt" onclick="setEmoji('🌟')">🌟</span>
+        <span class="emoji-opt" onclick="setEmoji('💀')">💀</span><span class="emoji-opt" onclick="setEmoji('🦅')">🦅</span>
+        <span class="emoji-opt" onclick="setEmoji('🔥')">🔥</span><span class="emoji-opt" onclick="setEmoji('🌙')">🌙</span>
+      </div>
+      <input class="char-name" id="charName" value="Aventurier" spellcheck="false"/>
+      <div class="class-selector">
+        <button class="class-btn active" onclick="setClass('Guerrier',this)">Guerrier</button>
+        <button class="class-btn" onclick="setClass('Mage',this)">Mage</button>
+        <button class="class-btn" onclick="setClass('Archer',this)">Archer</button>
+        <button class="class-btn" onclick="setClass('Barde',this)">Barde</button>
+        <button class="class-btn" onclick="setClass('Moine',this)">Moine</button>
+      </div>
+    </div>
+
+    <div class="level-display">
+      <div class="level-label">Niveau</div>
+      <div class="level-num" id="levelNum">01</div>
+      <div class="xp-bar-wrap"><div class="xp-bar" id="xpBar" style="width:0%"></div></div>
+      <div class="xp-text" id="xpText">0 / 100 XP</div>
+    </div>
+
+    <div class="card-title" style="margin-top:.3rem">
+      <span class="card-title-left"><span>📊</span> Attributs</span>
+      <button class="add-custom-btn" onclick="openStatModal()">+ Attribut custom</button>
+    </div>
+    <div id="statsContainer"></div>
+    <div id="pointsNotice" class="points-notice">✨ Points à distribuer ! Clique sur une barre.</div>
+  </div>
+
+  <!-- ══ RIGHT COLUMN ══ -->
+  <div class="right-col">
+
+    <!-- QUESTS -->
+    <div class="card">
+      <div class="card-title"><span class="card-title-left"><span>📜</span> Quêtes</span></div>
+      <div class="quest-add">
+        <input class="quest-input" id="questInput" placeholder="Nouvelle quête..." maxlength="60" onkeydown="if(event.key==='Enter')addQuest()"/>
+        <select class="quest-select" id="questCat"></select>
+        <select class="quest-select" id="questDiff">
+          <option value="15">Facile</option>
+          <option value="30" selected>Normale</option>
+          <option value="60">Difficile</option>
+          <option value="100">Épique</option>
+        </select>
+        <button class="btn-add" onclick="addQuest()">+ Ajouter</button>
+      </div>
+      <div class="quest-list" id="questList"></div>
+    </div>
+
+    <div class="bottom-row">
+      <!-- ACHIEVEMENTS -->
+      <div class="card">
+        <div class="card-title">
+          <span class="card-title-left"><span>🏆</span> Haut-Faits</span>
+          <button class="add-custom-btn" onclick="openAchModal()">+ Haut-fait custom</button>
+        </div>
+        <div class="ach-grid" id="achGrid"></div>
+      </div>
+
+      <!-- JOURNAL -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-left"><span>📖</span> Journal</span></div>
+        <div class="journal-list" id="journalList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══ MODAL: CUSTOM STAT ══ -->
+<div class="modal-overlay" id="statModal" style="display:none" onclick="if(event.target===this)closeStatModal()">
+  <div class="modal">
+    <div class="modal-title">✨ Nouvel Attribut Custom</div>
+
+    <label>Nom de l'attribut</label>
+    <input type="text" id="newStatName" placeholder="Ex: Discipline, Courage..." maxlength="20"/>
+
+    <label>Emoji / Icône</label>
+    <div class="emoji-picker-row" id="statEmojiPicker"></div>
+    <div style="margin-top:4px;font-size:.72rem;color:var(--text-muted)">Sélectionné : <span id="statEmojiPreview">🌀</span></div>
+
+    <label>Couleur</label>
+    <div class="color-row" id="statColorRow"></div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeStatModal()">Annuler</button>
+      <button class="btn-confirm" onclick="confirmAddStat()">Créer l'attribut</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: CUSTOM ACHIEVEMENT ══ -->
+<div class="modal-overlay" id="achModal" style="display:none" onclick="if(event.target===this)closeAchModal()">
+  <div class="modal">
+    <div class="modal-title">🏅 Nouveau Haut-Fait Custom</div>
+
+    <label>Nom du haut-fait</label>
+    <input type="text" id="newAchName" placeholder="Ex: Maître du Code..." maxlength="30"/>
+
+    <label>Emoji / Icône</label>
+    <div class="emoji-picker-row" id="achEmojiPicker"></div>
+    <div style="margin-top:4px;font-size:.72rem;color:var(--text-muted)">Sélectionné : <span id="achEmojiPreview">🏅</span></div>
+
+    <label>Condition de déblocage</label>
+    <select id="achCondType" onchange="updateAchCondFields()">
+      <option value="manual">Manuel (cliquer pour débloquer)</option>
+      <option value="quests">Nombre de quêtes complétées</option>
+      <option value="level">Atteindre le niveau X</option>
+      <option value="stat">Stat atteint une valeur</option>
+    </select>
+
+    <div class="cond-fields" id="condQuests">
+      <label>Nombre de quêtes requises</label>
+      <input type="text" id="condQuestsVal" placeholder="Ex: 20"/>
+    </div>
+    <div class="cond-fields" id="condLevel">
+      <label>Niveau requis</label>
+      <input type="text" id="condLevelVal" placeholder="Ex: 15"/>
+    </div>
+    <div class="cond-fields" id="condStat">
+      <label>Attribut concerné</label>
+      <select id="condStatKey"></select>
+      <label>Valeur minimale</label>
+      <input type="text" id="condStatVal" placeholder="Ex: 15"/>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAchModal()">Annuler</button>
+      <button class="btn-confirm" onclick="confirmAddAch()">Créer le haut-fait</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════ STATE ══════════════════
+const DEFAULT_STATS = [
+  {key:'force',name:'Force',icon:'💪',color:'#e74c3c',custom:false},
+  {key:'intel',name:'Intelligence',icon:'🧠',color:'#3498db',custom:false},
+  {key:'charisme',name:'Charisme',icon:'🌟',color:'#9b59b6',custom:false},
+  {key:'creativite',name:'Créativité',icon:'🎨',color:'#f39c12',custom:false},
+  {key:'sante',name:'Santé',icon:'🍃',color:'#2ecc71',custom:false},
+];
+
+const DEFAULT_ACHIEVEMENTS = [
+  {id:'first_quest',icon:'⚔️',name:'Première quête',type:'quests',param:1,custom:false},
+  {id:'lvl5',icon:'🌟',name:'Niveau 5',type:'level',param:5,custom:false},
+  {id:'lvl10',icon:'👑',name:'Niveau 10',type:'level',param:10,custom:false},
+  {id:'quests10',icon:'📜',name:'10 quêtes',type:'quests',param:10,custom:false},
+  {id:'quests50',icon:'📚',name:'50 quêtes',type:'quests',param:50,custom:false},
+  {id:'stat20',icon:'💎',name:'Stat à 20',type:'anyStat',param:20,custom:false},
+  {id:'epic',icon:'🐉',name:'Quête épique',type:'epic',param:1,custom:false},
+];
+
+const STAT_EMOJIS = ['💪','🧠','🌟','🎨','🍃','⚡','🔥','🏃','📚','🎯','🛡️','🔮','💡','🎵','🌙','❤️','🗡️','🌊','🏔️','✨','🦁','🐉','🔑','💰','🎮','🎲','🌱','🏆','💫','🦋'];
+const ACH_EMOJIS = ['🏆','🥇','🎖️','🌟','💎','🔥','⚡','🗡️','🛡️','🐉','🦁','🔮','💀','👑','🌙','✨','🎯','🎵','📚','🎨','🏹','🦅','🌊','⚔️','🧿','🪄','🏅','🎭','🎪','💫'];
+const COLORS = ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c','#3498db','#9b59b6','#e91e63','#00bcd4','#8bc34a','#ff5722','#607d8b','#a07de0','#f06292','#4db6ac'];
+
+let selectedStatEmoji = '🌀';
+let selectedStatColor = COLORS[0];
+let selectedAchEmoji = '🏅';
+
+function defaultState() {
+  return {
+    name:'Aventurier',classType:'Guerrier',avatar:'⚔️',
+    level:1,xp:0,statPoints:5,
+    stats:{force:5,intel:5,charisme:5,creativite:5,sante:5},
+    statDefs:[...DEFAULT_STATS],
+    achDefs:[...DEFAULT_ACHIEVEMENTS],
+    quests:[],journal:[],
+    totalDone:0,epicDone:0,classesUsed:['Guerrier'],
+    unlockedAch:[],manualAch:[],
+    nextQuestId:1,nextCustomId:1,
+  };
+}
+
+function loadState(){
+  try{const s=localStorage.getItem('lifequest_v2');if(s)return Object.assign(defaultState(),JSON.parse(s));}catch(e){}
+  return defaultState();
+}
+let state=loadState();
+
+function saveState(){localStorage.setItem('lifequest_v2',JSON.stringify(state));}
+
+// ══════════════════ RENDER ══════════════════
+function renderAll(){
+  document.getElementById('avatarEmoji').textContent=state.avatar;
+  document.getElementById('charName').value=state.name;
+  document.querySelectorAll('.class-btn').forEach(b=>b.classList.toggle('active',b.textContent===state.classType));
+
+  const needed=xpNeeded(state.level);
+  const pct=Math.min(100,(state.xp/needed)*100);
+  document.getElementById('levelNum').textContent=String(state.level).padStart(2,'0');
+  document.getElementById('xpBar').style.width=pct+'%';
+  document.getElementById('xpText').textContent=`${state.xp} / ${needed} XP`;
+
+  renderStats();
+  refreshQuestCatSelect();
+  renderQuests();
+  renderAchievements();
+  renderJournal();
+
+  const hp=state.statPoints>0;
+  document.getElementById('pointsNotice').style.display=hp?'block':'none';
+}
+
+function renderStats(){
+  const c=document.getElementById('statsContainer');c.innerHTML='';
+  state.statDefs.forEach(s=>{
+    const val=state.stats[s.key]||0;
+    const pct=Math.min(100,val*3.33);
+    const row=document.createElement('div');row.className='stat-row';
+    row.innerHTML=`
+      <div class="stat-header">
+        <span class="stat-name" style="color:${s.color}">${s.icon} ${s.name}</span>
+        <span class="stat-val" style="color:${s.color}">${val}</span>
+      </div>
+      <div class="stat-bar-wrap" title="Cliquer pour +1 (si points dispo)" onclick="addStatPoint('${s.key}')">
+        <div class="stat-bar" style="width:${pct}%;background:${s.color}"></div>
+      </div>
+      ${s.custom?`<button class="stat-del-btn" onclick="deleteStat('${s.key}',event)" title="Supprimer">✕</button>`:''}
+    `;
+    c.appendChild(row);
+  });
+}
+
+function refreshQuestCatSelect(){
+  const sel=document.getElementById('questCat');
+  const cur=sel.value;
+  sel.innerHTML='';
+  state.statDefs.forEach(s=>{
+    const o=document.createElement('option');o.value=s.key;o.textContent=`${s.icon} ${s.name}`;sel.appendChild(o);
+  });
+  if(cur)sel.value=cur;
+}
+
+function renderQuests(){
+  const list=document.getElementById('questList');
+  if(!state.quests.length){list.innerHTML='<div class="empty-state">Aucune quête active. Lance-toi !</div>';return;}
+  list.innerHTML='';
+  [...state.quests].reverse().forEach(q=>{
+    const def=state.statDefs.find(s=>s.key===q.cat);
+    const col=def?def.color:'#888';
+    const el=document.createElement('div');el.className='quest-item'+(q.done?' done':'');
+    el.innerHTML=`
+      <div class="quest-checkbox">${q.done?'✓':''}</div>
+      <div class="quest-cat" style="background:${col}"></div>
+      <div class="quest-text">${esc(q.text)}</div>
+      <div class="quest-xp">+${q.xp}XP</div>
+      <button class="quest-del" onclick="deleteQuest(${q.id},event)">✕</button>
+    `;
+    if(!q.done)el.onclick=e=>{if(!e.target.classList.contains('quest-del'))completeQuest(q.id);};
+    list.appendChild(el);
+  });
+}
+
+function renderAchievements(){
+  const grid=document.getElementById('achGrid');grid.innerHTML='';
+  // Check auto achievements
+  state.achDefs.forEach(a=>{
+    const unlocked=checkAch(a);
+    if(unlocked&&!state.unlockedAch.includes(a.id)){
+      state.unlockedAch.push(a.id);
+      showToast(`🏆 ${a.name} débloqué !`);
+    }
+  });
+
+  state.achDefs.forEach(a=>{
+    const isManual=a.type==='manual';
+    const unlocked=isManual?state.manualAch.includes(a.id):state.unlockedAch.includes(a.id);
+    const el=document.createElement('div');
+    el.title=isManual&&!unlocked?'Cliquer pour marquer comme accompli':unlocked?'Débloqué !':getAchHint(a);
+    if(unlocked)el.className='ach-item unlocked';
+    else if(isManual)el.className='ach-item manual-locked';
+    else el.className='ach-item locked';
+    el.innerHTML=`
+      <span class="ach-icon">${a.icon}</span>
+      <div class="ach-name">${a.name}</div>
+      ${a.custom?`<button class="ach-del" onclick="deleteAch('${a.id}',event)" title="Supprimer">✕</button>`:''}
+    `;
+    if(isManual&&!unlocked)el.onclick=()=>manualUnlock(a.id,a.name);
+    grid.appendChild(el);
+  });
+}
+
+function renderJournal(){
+  const list=document.getElementById('journalList');
+  if(!state.journal.length){list.innerHTML='<div class="empty-state">Ton histoire commence ici...</div>';return;}
+  list.innerHTML='';
+  [...state.journal].reverse().slice(0,40).forEach((e,i)=>{
+    const el=document.createElement('div');el.className='journal-entry'+(i===0?' new':'');
+    el.innerHTML=`<span class="journal-time">${e.time}</span><span>${esc(e.msg)}</span>`;
+    list.appendChild(el);
+  });
+}
+
+// ══════════════════ ACHIEVEMENTS LOGIC ══════════════════
+function checkAch(a){
+  if(a.type==='manual') return state.manualAch.includes(a.id);
+  if(a.type==='quests') return state.totalDone>=a.param;
+  if(a.type==='level') return state.level>=a.param;
+  if(a.type==='epic') return state.epicDone>=a.param;
+  if(a.type==='anyStat') return Object.values(state.stats).some(v=>v>=a.param);
+  if(a.type==='stat') return (state.stats[a.param.key]||0)>=a.param.val;
+  return false;
+}
+function getAchHint(a){
+  if(a.type==='quests') return `Compléter ${a.param} quêtes (${state.totalDone}/${a.param})`;
+  if(a.type==='level') return `Atteindre le niveau ${a.param} (actuel: ${state.level})`;
+  if(a.type==='anyStat') return `Avoir une stat ≥ ${a.param}`;
+  if(a.type==='epic') return `Compléter une quête épique`;
+  if(a.type==='stat') return `${a.param.key} ≥ ${a.param.val}`;
+  return '';
+}
+function manualUnlock(id,name){
+  if(!state.manualAch.includes(id)){
+    state.manualAch.push(id);
+    state.unlockedAch.push(id);
+    showToast(`🏆 ${name} accompli !`);
+    addJournal(`🏅 Haut-fait débloqué : ${name}`);
+    saveState();renderAll();
+  }
+}
+
+// ══════════════════ ACTIONS ══════════════════
+function addQuest(){
+  const inp=document.getElementById('questInput');
+  const text=inp.value.trim();if(!text)return;
+  const cat=document.getElementById('questCat').value;
+  const xp=parseInt(document.getElementById('questDiff').value);
+  state.quests.push({id:state.nextQuestId++,text,cat,xp,done:false});
+  inp.value='';
+  saveState();renderAll();
+}
+
+function completeQuest(id){
+  const q=state.quests.find(q=>q.id===id);if(!q||q.done)return;
+  q.done=true;state.totalDone++;
+  if(q.xp>=100)state.epicDone++;
+  const def=state.statDefs.find(s=>s.key===q.cat);
+  if(def){state.stats[q.cat]=(state.stats[q.cat]||0)+1;}
+  gainXP(q.xp);
+  addJournal(`✅ "${q.text}" (+${q.xp} XP${def?', +1 '+def.name:''})`);
+  showXpPopup(q.xp);showToast(`+${q.xp} XP — ${q.text}`);
+  saveState();renderAll();
+}
+
+function deleteQuest(id,e){e.stopPropagation();state.quests=state.quests.filter(q=>q.id!==id);saveState();renderAll();}
+
+function gainXP(amount){
+  state.xp+=amount;
+  while(state.xp>=xpNeeded(state.level)){
+    state.xp-=xpNeeded(state.level);state.level++;state.statPoints+=3;
+    setTimeout(()=>showLevelUp(state.level),300);
+    addJournal(`🌟 Niveau ${state.level} ! +3 points de stat`);
+  }
+}
+
+function addStatPoint(key){
+  if(state.statPoints<=0){showToast('Aucun point dispo ! Complète des quêtes.');return;}
+  state.stats[key]=(state.stats[key]||0)+1;state.statPoints--;
+  const def=state.statDefs.find(s=>s.key===key);
+  addJournal(`📊 +1 ${def?def.name:key}`);
+  saveState();renderAll();
+}
+
+function setClass(cls,btn){
+  state.classType=cls;if(!state.classesUsed.includes(cls))state.classesUsed.push(cls);
+  addJournal(`🎭 Classe : ${cls}`);saveState();renderAll();
+}
+function setEmoji(e){state.avatar=e;document.getElementById('emojiPanel').classList.remove('open');saveState();renderAll();}
+function toggleEmoji(){document.getElementById('emojiPanel').classList.toggle('open');}
+document.getElementById('charName').addEventListener('input',function(){state.name=this.value||'Aventurier';saveState();});
+
+// ══════════════════ CUSTOM STAT MODAL ══════════════════
+function openStatModal(){
+  selectedStatEmoji='🌀';selectedStatColor=COLORS[0];
+  document.getElementById('newStatName').value='';
+  buildEmojiPicker('statEmojiPicker',STAT_EMOJIS,'statEmojiPreview',e=>{selectedStatEmoji=e;});
+  buildColorPicker('statColorRow',c=>{selectedStatColor=c;});
+  document.getElementById('statEmojiPreview').textContent=selectedStatEmoji;
+  document.getElementById('statModal').style.display='flex';
+}
+function closeStatModal(){document.getElementById('statModal').style.display='none';}
+function confirmAddStat(){
+  const name=document.getElementById('newStatName').value.trim();
+  if(!name){showToast('Donne un nom à l\'attribut !');return;}
+  const key='custom_'+Date.now();
+  state.statDefs.push({key,name,icon:selectedStatEmoji,color:selectedStatColor,custom:true});
+  state.stats[key]=5;
+  addJournal(`✨ Nouvel attribut : ${selectedStatEmoji} ${name}`);
+  closeStatModal();saveState();renderAll();
+  showToast(`Attribut "${name}" créé !`);
+}
+function deleteStat(key,e){
+  e.stopPropagation();
+  if(!confirm('Supprimer cet attribut ?'))return;
+  state.statDefs=state.statDefs.filter(s=>s.key!==key);
+  delete state.stats[key];
+  addJournal(`🗑️ Attribut supprimé`);
+  saveState();renderAll();
+}
+
+// ══════════════════ CUSTOM ACH MODAL ══════════════════
+function openAchModal(){
+  selectedAchEmoji='🏅';
+  document.getElementById('newAchName').value='';
+  document.getElementById('achCondType').value='manual';
+  buildEmojiPicker('achEmojiPicker',ACH_EMOJIS,'achEmojiPreview',e=>{selectedAchEmoji=e;});
+  document.getElementById('achEmojiPreview').textContent=selectedAchEmoji;
+  // Fill stat select
+  const sel=document.getElementById('condStatKey');sel.innerHTML='';
+  state.statDefs.forEach(s=>{const o=document.createElement('option');o.value=s.key;o.textContent=`${s.icon} ${s.name}`;sel.appendChild(o);});
+  updateAchCondFields();
+  document.getElementById('achModal').style.display='flex';
+}
+function closeAchModal(){document.getElementById('achModal').style.display='none';}
+function updateAchCondFields(){
+  const t=document.getElementById('achCondType').value;
+  ['condQuests','condLevel','condStat'].forEach(id=>document.getElementById(id).classList.remove('visible'));
+  if(t==='quests')document.getElementById('condQuests').classList.add('visible');
+  else if(t==='level')document.getElementById('condLevel').classList.add('visible');
+  else if(t==='stat')document.getElementById('condStat').classList.add('visible');
+}
+function confirmAddAch(){
+  const name=document.getElementById('newAchName').value.trim();
+  if(!name){showToast('Donne un nom au haut-fait !');return;}
+  const condType=document.getElementById('achCondType').value;
+  let param=null;
+  if(condType==='quests'){param=parseInt(document.getElementById('condQuestsVal').value)||5;}
+  else if(condType==='level'){param=parseInt(document.getElementById('condLevelVal').value)||5;}
+  else if(condType==='stat'){param={key:document.getElementById('condStatKey').value,val:parseInt(document.getElementById('condStatVal').value)||10};}
+  const id='cach_'+Date.now();
+  state.achDefs.push({id,icon:selectedAchEmoji,name,type:condType,param,custom:true});
+  addJournal(`🏅 Nouveau haut-fait : ${selectedAchEmoji} ${name}`);
+  closeAchModal();saveState();renderAll();
+  showToast(`Haut-fait "${name}" créé !`);
+}
+function deleteAch(id,e){
+  e.stopPropagation();
+  state.achDefs=state.achDefs.filter(a=>a.id!==id);
+  state.unlockedAch=state.unlockedAch.filter(i=>i!==id);
+  state.manualAch=state.manualAch.filter(i=>i!==id);
+  addJournal(`🗑️ Haut-fait supprimé`);
+  saveState();renderAll();
+}
+
+// ══════════════════ HELPERS ══════════════════
+function buildEmojiPicker(containerId, emojis, previewId, onSelect){
+  const c=document.getElementById(containerId);c.innerHTML='';
+  emojis.forEach(e=>{
+    const el=document.createElement('span');el.className='ep-opt';el.textContent=e;
+    el.onclick=()=>{
+      c.querySelectorAll('.ep-opt').forEach(x=>x.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById(previewId).textContent=e;
+      onSelect(e);
+    };
+    c.appendChild(el);
+  });
+  if(c.firstChild)c.firstChild.classList.add('selected');
+}
+function buildColorPicker(containerId, onSelect){
+  const c=document.getElementById(containerId);c.innerHTML='';
+  COLORS.forEach((col,i)=>{
+    const el=document.createElement('div');el.className='color-swatch'+(i===0?' selected':'');
+    el.style.background=col;
+    el.onclick=()=>{
+      c.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('selected'));
+      el.classList.add('selected');onSelect(col);
+    };
+    c.appendChild(el);
+  });
+}
+function addJournal(msg){
+  const now=new Date();
+  const time=now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  state.journal.push({msg,time});
+  if(state.journal.length>60)state.journal.shift();
+}
+function showToast(msg){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;c.appendChild(t);
+  setTimeout(()=>{t.style.animation='toastOut .3s ease forwards';setTimeout(()=>t.remove(),300);},2600);
+}
+function showXpPopup(amount){
+  const el=document.createElement('div');el.className='xp-popup';el.textContent='+'+amount+' XP';
+  el.style.left=(Math.random()*50+25)+'%';el.style.top='35%';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1200);
+}
+function showLevelUp(lvl){
+  const msgs=['Tu deviens légendaire !','Ta puissance grandit !','La gloire t\'attend !','Rien ne peut t\'arrêter !'];
+  const overlay=document.createElement('div');overlay.className='levelup-overlay';
+  overlay.innerHTML=`<div class="levelup-box">
+    <div style="font-size:3rem;margin-bottom:.4rem">🌟</div>
+    <div class="levelup-title">NIVEAU SUPÉRIEUR</div>
+    <span class="levelup-num">${String(lvl).padStart(2,'0')}</span>
+    <div class="levelup-sub">${msgs[Math.floor(Math.random()*msgs.length)]}</div>
+    <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:1rem">+3 points de statistiques</div>
+    <button class="btn-close" onclick="this.closest('.levelup-overlay').remove()">CONTINUER →</button>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+function xpNeeded(lvl){return Math.floor(100*Math.pow(1.3,lvl-1));}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ══════════════════ INIT ══════════════════
+if(!state.quests.length&&!state.journal.length){
+  const samples=[
+    {text:'Faire 20 min de sport',cat:'force',xp:30},
+    {text:'Lire 10 pages',cat:'intel',xp:15},
+    {text:'Appeler un ami',cat:'charisme',xp:15},
+    {text:'Travailler sur un projet créatif',cat:'creativite',xp:30},
+    {text:'Se coucher avant minuit',cat:'sante',xp:15},
+  ];
+  samples.forEach(s=>state.quests.push({id:state.nextQuestId++,...s,done:false}));
+  addJournal('📖 Bienvenue dans LifeQuest ! Ta légende commence maintenant.');
+  saveState();
+}
+renderAll();
+</script>
+</body>
+</html>
